@@ -1,27 +1,25 @@
 import express from 'express';
-import pinoHttp from 'pino-http';
+import cors from 'cors';
+import pino from 'pino-http';
 
 const app = express();
+app.use(cors());
+app.use(
+  pino({
+    level: 'info',
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'HH:MM:ss',
+        ignore: 'pid,hostname',
+        messageFormat: '{req.method} {req.url} {res.statusCode} - {responseTime}ms',
+        hideObject: true,
+      },
+    },
+  }),
+);
 
-const logger = pinoHttp({
-  // Налаштування транспорту для читабельного вигляду під час розробки
-  transport: process.env.NODE_ENV !== 'production'
-    ? { target: 'pino-pretty' }
-    : undefined,
-  // Додавання додаткової інформації до логів
-  customLogLevel: function (req, res, err) {
-    if (res.statusCode >= 500 || err) return 'error';
-    if (res.statusCode >= 400) return 'warn';
-    return 'info';
-  },
-});
-
-app.use((req, res, next) => {
-  console.log(`Time: ${new Date().toLocaleString()}`);
-  next();
-});
-
-app.use(logger);
 
 app.get("/notes", (req, res) => {
   res.status(200).json({ message: "Retrieved all notes" });
