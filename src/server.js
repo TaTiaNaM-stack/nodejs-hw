@@ -1,9 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
+import helmet from 'helmet';
+import 'dotenv/config';
 
 const app = express();
 app.use(cors());
+app.use(helmet());
 app.use(
   pino({
     level: 'info',
@@ -21,6 +24,8 @@ app.use(
 );
 
 app.use(express.json());
+
+console.log(process.env.NODE_ENV);
 
 app.get("/notes", (req, res) => {
   res.status(200).json({ message: "Retrieved all notes" });
@@ -40,10 +45,12 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: err.stack });
+  const isProd = process.env.NODE_ENV === 'production';
+  res.status(500).json({
+    message: isProd ? "Internal Server Error" : err.stack,
+  });
 });
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log('Server is running on port 3000');
 });
