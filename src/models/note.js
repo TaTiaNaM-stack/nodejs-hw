@@ -19,7 +19,7 @@ const noteSchema = new Schema({
   }
 }, { timestamps: true });
 
-noteSchema.index({ title: 1, content: 1, tag: 1 });
+noteSchema.index({ tag: 1 });
 
 export const Note = model('Note', noteSchema);
 
