@@ -3,6 +3,9 @@ import cors from 'cors';
 import 'dotenv/config';
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from '../swagger-output.json' with { type: 'json' };
+
 import { errors } from "celebrate";
 import { connectMongoDB } from './db/connectMongoDB.js';
 import { logger } from './middleware/logger.js';
@@ -26,10 +29,11 @@ app.use(logger);
 
 app.use(express.json());
 app.use(cookieParser());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(authRoutes);
 app.use(notesRoutes);
-app.use(userRoutes);    
+app.use(userRoutes);
 app.use(notFoundHandler);
 app.use(errors());
 app.use(errorHandler);
@@ -38,4 +42,5 @@ await connectMongoDB();
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server is running on port ${process.env.PORT || 3000}`);
+  console.log(`Swagger docs available at http://localhost:${process.env.PORT || 3000}/api-docs`);
 });
